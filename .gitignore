@@ -1,0 +1,42 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+ENV/
+*.env
+
+# SQLite database
+db.sqlite3
+
+# Django migrations (optional, often not tracked)
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# Media and static files
+media/
+staticfiles/
+
+# Model files (if you have ML models)
+*.h5
+*.pt
+*.pth
+*.joblib
+*.sav
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# Mac/Linux system files
+.DS_Store
+*.swp
