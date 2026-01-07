@@ -5,7 +5,6 @@ import hashlib
 def get_user_identifier(request):
     """
     Generate a unique identifier for the user based on browser fingerprint
-    You can enhance this with more sophisticated fingerprinting
     """
     user_agent = request.META.get('HTTP_USER_AGENT', '')
     ip_address = get_client_ip(request)

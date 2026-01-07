@@ -2,7 +2,6 @@
 from rest_framework import serializers
 from .models import Category, Tag, Author, News, MediaFile
 
-
 class CategorySerializer(serializers.ModelSerializer):
     """Category serializer"""
     class Meta:
@@ -111,7 +110,8 @@ class NewsDetailSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
 
     author_id = serializers.IntegerField(source='author.id', read_only=True)
-    author = AuthorSerializer(read_only=True)
+    author_name = serializers.CharField(source='author.name', read_only=True)
+    author_designation = serializers.CharField(source='author.designation', read_only=True)
 
     feature_image = serializers.SerializerMethodField()
     media_files_list = MediaFileSerializer(source='media_files', many=True, read_only=True)
@@ -124,7 +124,7 @@ class NewsDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'subtitle', 'slug', 'excerpt', 'content',
             'category_id', 'category_name', 'category_slug',
-            'tags', 'author_id', 'author',
+            'tags', 'author_id', 'author_name', 'author_designation',
             'feature_image', 'media_files_list',
             'status', 'published_at', 'views_count',
             'is_pinned_global', 'is_pinned_category',
@@ -132,8 +132,14 @@ class NewsDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_tags(self, obj):
-        """Return array of tag IDs as shown in your example"""
-        return list(obj.tags.values_list('id', flat=True))
+        return [
+            {
+                'id': tag.id,
+                'name': tag.name,
+                'slug': tag.slug
+            }
+            for tag in obj.tags.all()
+        ]
 
     def get_feature_image(self, obj):
         """Return list of feature images"""
@@ -220,7 +226,7 @@ class NewsCreateUpdateSerializer(serializers.ModelSerializer):
             instance.tags.set(tags)
 
         if media_files_data is not None:
-            # Clear existing media files and create new ones
+            """Clear existing media files and create new ones"""
             instance.media_files.all().delete()
             for media_data in media_files_data:
                 MediaFile.objects.create(news=instance, **media_data)

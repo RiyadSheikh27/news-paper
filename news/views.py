@@ -1,4 +1,3 @@
-"""news/views.py"""
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q, Prefetch
@@ -128,7 +127,7 @@ class NewsListView(APIView):
 
     def get(self, request):
         try:
-            # Base queryset - only published news
+            """Base queryset - only published news"""
             queryset = News.objects.filter(
                 status='PUBLISHED'
             ).select_related(
@@ -141,27 +140,27 @@ class NewsListView(APIView):
                 )
             )
 
-            # Filter by category
+            """Filter by category"""
             category_slug = request.GET.get('category')
             if category_slug:
                 queryset = queryset.filter(category__slug=category_slug)
 
-            # Filter by tag
+            """Filter by tag"""
             tag_slug = request.GET.get('tag')
             if tag_slug:
                 queryset = queryset.filter(tags__slug=tag_slug)
 
-            # Search by title
+            """Search by title"""
             search = request.GET.get('search')
             if search:
                 queryset = queryset.filter(
                     Q(title__icontains=search) | Q(excerpt__icontains=search)
                 )
 
-            # Get read news IDs from client
+            """Get read news IDs from client"""
             read_news_ids = get_read_news_ids(request)
 
-            # Filter by read status
+            """Filter by read status"""
             read_filter = request.GET.get('read')
             if read_filter:
                 if read_filter.lower() == 'true':
@@ -169,9 +168,9 @@ class NewsListView(APIView):
                 elif read_filter.lower() == 'false':
                     queryset = queryset.exclude(id__in=read_news_ids)
 
-            # Apply ordering based on pinning and category
+            """Apply ordering based on pinning and category"""
             if category_slug:
-                # Category view: show category-pinned first
+                """Category view: show category-pinned first"""
                 queryset = queryset.order_by(
                     '-is_pinned_category',
                     'pin_order_category',
@@ -179,7 +178,7 @@ class NewsListView(APIView):
                     '-created_at'
                 )
             else:
-                # Global view: show globally-pinned first
+                """Global view: show globally-pinned first"""
                 queryset = queryset.order_by(
                     '-is_pinned_global',
                     'pin_order_global',
@@ -187,7 +186,7 @@ class NewsListView(APIView):
                     '-created_at'
                 )
 
-            # Pagination
+            """Pagination"""
             paginator = StandardResultsSetPagination()
             paginated_queryset = paginator.paginate_queryset(queryset, request)
 
@@ -223,12 +222,12 @@ class NewsDetailView(APIView):
                 'tags', 'media_files'
             ).get(slug=slug, status='PUBLISHED')
 
-            # Track read
+            """Track read"""
             user_identifier = get_user_identifier(request)
             ip_address = get_client_ip(request)
             user_agent = request.META.get('HTTP_USER_AGENT', '')
 
-            # Update or create NewsRead record
+            """Update or create NewsRead record"""
             news_read, created = NewsRead.objects.get_or_create(
                 news=news,
                 user_identifier=user_identifier,
@@ -244,10 +243,10 @@ class NewsDetailView(APIView):
                 news_read.user_agent = user_agent
                 news_read.save(update_fields=['read_count', 'ip_address', 'user_agent', 'last_read_at'])
 
-            # Increment views count
+            """Increment views count"""
             news.increment_views()
 
-            # Get read news IDs
+            """Get read news IDs"""
             read_news_ids = get_read_news_ids(request)
 
             serializer = NewsDetailSerializer(
@@ -276,7 +275,7 @@ class NewsCreateView(APIView):
             if serializer.is_valid():
                 news = serializer.save()
 
-                # Return detailed response
+                """Return detailed response"""
                 detail_serializer = NewsDetailSerializer(
                     news,
                     context={'request': request}
@@ -382,7 +381,7 @@ class PinnedNewsView(APIView):
             pin_type = request.GET.get('type', 'global')
 
             if pin_type == 'global':
-                # Get globally pinned news (max 5)
+                """Get globally pinned news (max 5)"""
                 queryset = News.objects.filter(
                     status='PUBLISHED',
                     is_pinned_global=True
@@ -401,14 +400,14 @@ class PinnedNewsView(APIView):
                 if not category_slug:
                     return error_response(message="Category slug is required for category pins")
 
-                # Get category object to check max_pinned_news
+                """Get category object to check max_pinned_news"""
                 try:
                     category = Category.objects.get(slug=category_slug)
                     max_pinned = category.max_pinned_news
                 except Category.DoesNotExist:
                     return not_found_response(message="Category not found")
 
-                # Get category pinned news
+                """Get category pinned news"""
                 queryset = News.objects.filter(
                     status='PUBLISHED',
                     category__slug=category_slug,
@@ -425,7 +424,7 @@ class PinnedNewsView(APIView):
             else:
                 return error_response(message="Invalid type. Use 'global' or 'category'")
 
-            # Get read news IDs
+            """Get read news IDs"""
             read_news_ids = get_read_news_ids(request)
 
             serializer = NewsListSerializer(

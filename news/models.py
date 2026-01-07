@@ -1,10 +1,8 @@
-"""news/models.py"""
 from django.db import models
 from django.utils.text import slugify
 from django.core.validators import FileExtensionValidator
 from utils.models import TimeStampedModel
 from ckeditor.fields import RichTextField
-
 
 class Category(TimeStampedModel):
     """News Category Model"""
@@ -13,7 +11,7 @@ class Category(TimeStampedModel):
     is_active = models.BooleanField(default=True)
     description = models.TextField(blank=True)
 
-    # Pin settings for category
+    """Pin settings for category"""
     max_pinned_news = models.IntegerField(
         default=3,
         help_text="Maximum number of pinned news in this category"
@@ -126,7 +124,7 @@ class News(TimeStampedModel):
         default='DRAFT'
     )
 
-    # Pinning system
+    """Pinning system"""
     is_pinned_global = models.BooleanField(
         default=False,
         help_text="Pin this news globally (top 5)"
@@ -147,7 +145,7 @@ class News(TimeStampedModel):
     published_at = models.DateTimeField(blank=True, null=True)
     views_count = models.IntegerField(default=0)
 
-    # SEO Fields
+    """SEO Fields"""
     seo_title = models.CharField(max_length=200, blank=True)
     seo_subtitle = models.CharField(max_length=500, blank=True)
     seo_description = models.TextField(blank=True)
@@ -168,7 +166,7 @@ class News(TimeStampedModel):
         ]
 
     def save(self, *args, **kwargs):
-        # Auto-generate slug
+        """Auto-generate slug"""
         if not self.slug:
             base_slug = slugify(self.title)
             slug = base_slug
@@ -178,7 +176,7 @@ class News(TimeStampedModel):
                 counter += 1
             self.slug = slug
 
-        # Auto-populate SEO fields if empty
+        """Auto-populate SEO fields if empty"""
         if not self.seo_title:
             self.seo_title = f"{self.title} | NewsPortal"
         if not self.seo_subtitle:

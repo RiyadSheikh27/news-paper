@@ -1,10 +1,7 @@
-"""news/admin.py"""
-
 from django.contrib import admin
 from django.utils.html import format_html
 from django.db.models import Count
 from .models import Category, Tag, Author, News, MediaFile, NewsRead
-
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -217,7 +214,7 @@ class NewsAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
     class Media:
-        js = ("admin/js/news_admin.js",)  # Custom JS for dynamic tag filtering
+        js = ("admin/js/news_admin.js",)
 
 
 @admin.register(MediaFile)
@@ -280,4 +277,4 @@ class NewsReadAdmin(admin.ModelAdmin):
     user_identifier_short.short_description = "User ID"
 
     def has_add_permission(self, request):
-        return False  # Prevent manual creation
+        return False
