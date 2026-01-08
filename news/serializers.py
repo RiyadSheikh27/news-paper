@@ -1,41 +1,71 @@
 """news/serializers.py"""
+
 from rest_framework import serializers
 from .models import Category, Tag, Author, News, MediaFile
 
+
 class CategorySerializer(serializers.ModelSerializer):
     """Category serializer"""
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'description', 'is_active', 'created_at', 'updated_at']
-        read_only_fields = ['slug', 'created_at', 'updated_at']
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "description",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["slug", "created_at", "updated_at"]
 
 
 class TagSerializer(serializers.ModelSerializer):
     """Tag serializer"""
-    category_name = serializers.CharField(source='category.name', read_only=True)
+
+    category_name = serializers.CharField(source="category.name", read_only=True)
 
     class Meta:
         model = Tag
-        fields = ['id', 'name', 'slug', 'category', 'category_name', 'is_active', 'created_at', 'updated_at']
-        read_only_fields = ['slug', 'created_at', 'updated_at']
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "category",
+            "category_name",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["slug", "created_at", "updated_at"]
 
 
 class AuthorSerializer(serializers.ModelSerializer):
     """Author serializer"""
+
     profile_picture_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Author
         fields = [
-            'id', 'name', 'email', 'phone', 'bio',
-            'profile_picture', 'profile_picture_url', 'designation',
-            'is_active', 'created_at', 'updated_at'
+            "id",
+            "name",
+            "email",
+            "phone",
+            "bio",
+            "profile_picture",
+            "profile_picture_url",
+            "designation",
+            "is_active",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ["created_at", "updated_at"]
 
     def get_profile_picture_url(self, obj):
         if obj.profile_picture:
-            request = self.context.get('request')
+            request = self.context.get("request")
             if request:
                 return request.build_absolute_uri(obj.profile_picture.url)
             return obj.profile_picture.url
@@ -44,31 +74,38 @@ class AuthorSerializer(serializers.ModelSerializer):
 
 class MediaFileSerializer(serializers.ModelSerializer):
     """Media file serializer"""
-    file_url = serializers.SerializerMethodField()
 
+    # file_url = serializers.SerializerMethodField()
     class Meta:
         model = MediaFile
         fields = [
-            'id', 'file', 'file_url', 'file_type',
-            'caption', 'alt_text', 'is_featured', 'order',
-            'created_at', 'updated_at'
+            "id",
+            "file",
+            "file_type",
+            "caption",
+            "alt_text",
+            "is_featured",
+            "order",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ["created_at", "updated_at"]
 
-    def get_file_url(self, obj):
-        if obj.file:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.file.url)
-            return obj.file.url
-        return None
+    # def get_file_url(self, obj):
+    #     if obj.file:
+    #         request = self.context.get('request')
+    #         if request:
+    #             return request.build_absolute_uri(obj.file.url)
+    #         return obj.file.url
+    #     return None
 
 
 class NewsListSerializer(serializers.ModelSerializer):
     """Serializer for news list view"""
-    category_name = serializers.CharField(source='category.name', read_only=True)
-    category_slug = serializers.CharField(source='category.slug', read_only=True)
-    author_name = serializers.CharField(source='author.name', read_only=True)
+
+    category_name = serializers.CharField(source="category.name", read_only=True)
+    category_slug = serializers.CharField(source="category.slug", read_only=True)
+    author_name = serializers.CharField(source="author.name", read_only=True)
     tags_list = serializers.SerializerMethodField()
     feature_image = serializers.SerializerMethodField()
     is_read = serializers.SerializerMethodField()
@@ -76,20 +113,34 @@ class NewsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = [
-            'id', 'title', 'subtitle', 'slug', 'excerpt',
-            'category_name', 'category_slug', 'author_name',
-            'tags_list', 'feature_image', 'status',
-            'is_pinned_global', 'is_pinned_category',
-            'published_at', 'views_count', 'is_read', 'created_at'
+            "id",
+            "title",
+            "subtitle",
+            "slug",
+            "excerpt",
+            "category_name",
+            "category_slug",
+            "author_name",
+            "tags_list",
+            "feature_image",
+            "status",
+            "is_pinned_global",
+            "is_pinned_category",
+            "published_at",
+            "views_count",
+            "is_read",
+            "created_at",
         ]
 
     def get_tags_list(self, obj):
-        return [{'id': tag.id, 'name': tag.name, 'slug': tag.slug} for tag in obj.tags.all()]
+        return [
+            {"id": tag.id, "name": tag.name, "slug": tag.slug} for tag in obj.tags.all()
+        ]
 
     def get_feature_image(self, obj):
-        featured = obj.media_files.filter(is_featured=True, file_type='IMAGE').first()
+        featured = obj.media_files.filter(is_featured=True, file_type="IMAGE").first()
         if featured and featured.file:
-            request = self.context.get('request')
+            request = self.context.get("request")
             if request:
                 return request.build_absolute_uri(featured.file.url)
             return featured.file.url
@@ -97,24 +148,29 @@ class NewsListSerializer(serializers.ModelSerializer):
 
     def get_is_read(self, obj):
         """Check if news is read from context (passed from view)"""
-        read_news_ids = self.context.get('read_news_ids', [])
+        read_news_ids = self.context.get("read_news_ids", [])
         return obj.id in read_news_ids
 
 
 class NewsDetailSerializer(serializers.ModelSerializer):
     """Serializer for news detail view with full SEO data"""
-    category_id = serializers.IntegerField(source='category.id', read_only=True)
-    category_name = serializers.CharField(source='category.name', read_only=True)
-    category_slug = serializers.CharField(source='category.slug', read_only=True)
+
+    category_id = serializers.IntegerField(source="category.id", read_only=True)
+    category_name = serializers.CharField(source="category.name", read_only=True)
+    category_slug = serializers.CharField(source="category.slug", read_only=True)
 
     tags = serializers.SerializerMethodField()
 
-    author_id = serializers.IntegerField(source='author.id', read_only=True)
-    author_name = serializers.CharField(source='author.name', read_only=True)
-    author_designation = serializers.CharField(source='author.designation', read_only=True)
+    author_id = serializers.IntegerField(source="author.id", read_only=True)
+    author_name = serializers.CharField(source="author.name", read_only=True)
+    author_designation = serializers.CharField(
+        source="author.designation", read_only=True
+    )
 
     feature_image = serializers.SerializerMethodField()
-    media_files_list = MediaFileSerializer(source='media_files', many=True, read_only=True)
+    media_files_list = MediaFileSerializer(
+        source="media_files", many=True, read_only=True
+    )
 
     seo = serializers.SerializerMethodField()
     is_read = serializers.SerializerMethodField()
@@ -122,78 +178,100 @@ class NewsDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = [
-            'id', 'title', 'subtitle', 'slug', 'excerpt', 'content',
-            'category_id', 'category_name', 'category_slug',
-            'tags', 'author_id', 'author_name', 'author_designation',
-            'feature_image', 'media_files_list',
-            'status', 'published_at', 'views_count',
-            'is_pinned_global', 'is_pinned_category',
-            'seo', 'is_read', 'created_at', 'updated_at'
+            "id",
+            "title",
+            "subtitle",
+            "slug",
+            "excerpt",
+            "content",
+            "category_id",
+            "category_name",
+            "category_slug",
+            "tags",
+            "author_id",
+            "author_name",
+            "author_designation",
+            "feature_image",
+            "media_files_list",
+            "status",
+            "published_at",
+            "views_count",
+            "is_pinned_global",
+            "is_pinned_category",
+            "seo",
+            "is_read",
+            "created_at",
+            "updated_at",
         ]
 
     def get_tags(self, obj):
         return [
-            {
-                'id': tag.id,
-                'name': tag.name,
-                'slug': tag.slug
-            }
-            for tag in obj.tags.all()
+            {"id": tag.id, "name": tag.name, "slug": tag.slug} for tag in obj.tags.all()
         ]
 
     def get_feature_image(self, obj):
-        """Return list of feature images"""
-        featured_images = obj.media_files.filter(is_featured=True, file_type='IMAGE')
-        request = self.context.get('request')
+        featured_images = obj.media_files.filter(is_featured=True, file_type="IMAGE")
 
-        images = []
-        for media in featured_images:
-            if media.file:
-                if request:
-                    images.append(request.build_absolute_uri(media.file.url))
-                else:
-                    images.append(media.file.url)
+        if featured_images.exists():
+            return MediaFileSerializer(
+                featured_images, many=True, context=self.context
+            ).data
 
-        return images if images else None
+        return None
 
     def get_seo(self, obj):
         """Return SEO data in the format specified"""
         return {
-            'seo_title': obj.seo_title,
-            'seo_subtitle': obj.seo_subtitle,
-            'seo_description': obj.seo_description,
-            'seo_excerpt': obj.seo_excerpt,
-            'canonical_url': obj.canonical_url,
-            'seo_index': obj.seo_index
+            "seo_title": obj.seo_title,
+            "seo_subtitle": obj.seo_subtitle,
+            "seo_description": obj.seo_description,
+            "seo_excerpt": obj.seo_excerpt,
+            "canonical_url": obj.canonical_url,
+            "seo_index": obj.seo_index,
+            "seo_keywords": obj.seo_keywords,
         }
 
     def get_is_read(self, obj):
         """Check if news is read from context"""
-        read_news_ids = self.context.get('read_news_ids', [])
+        read_news_ids = self.context.get("read_news_ids", [])
         return obj.id in read_news_ids
 
 
 class NewsCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer for creating/updating news"""
+
     media_files = MediaFileSerializer(many=True, required=False)
 
     class Meta:
         model = News
         fields = [
-            'title', 'subtitle', 'slug', 'excerpt', 'content',
-            'category', 'tags', 'author', 'status',
-            'is_pinned_global', 'pin_order_global',
-            'is_pinned_category', 'pin_order_category',
-            'published_at',
-            'seo_title', 'seo_subtitle', 'seo_description',
-            'seo_excerpt', 'canonical_url', 'seo_index',
-            'media_files'
+            "title",
+            "subtitle",
+            "slug",
+            "excerpt",
+            "content",
+            "category",
+            "tags",
+            "author",
+            "status",
+            "is_pinned_global",
+            "pin_order_global",
+            "is_pinned_category",
+            "pin_order_category",
+            "published_at",
+            "seo_title",
+            "seo_subtitle",
+            "seo_description",
+            "seo_excerpt",
+            "canonical_url",
+            "seo_index",
+            "media_files",
         ]
-        read_only_fields = ['slug']
+        read_only_fields = ["slug"]
 
     def validate_tags(self, value):
         """Validate that all tags belong to the selected category"""
-        category = self.initial_data.get('category')
+        category = self.initial_data.get("category")
         if category:
             for tag in value:
                 if tag.category_id != int(category):
@@ -203,8 +281,8 @@ class NewsCreateUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        media_files_data = validated_data.pop('media_files', [])
-        tags = validated_data.pop('tags', [])
+        media_files_data = validated_data.pop("media_files", [])
+        tags = validated_data.pop("tags", [])
 
         news = News.objects.create(**validated_data)
         news.tags.set(tags)
@@ -215,8 +293,8 @@ class NewsCreateUpdateSerializer(serializers.ModelSerializer):
         return news
 
     def update(self, instance, validated_data):
-        media_files_data = validated_data.pop('media_files', None)
-        tags = validated_data.pop('tags', None)
+        media_files_data = validated_data.pop("media_files", None)
+        tags = validated_data.pop("tags", None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

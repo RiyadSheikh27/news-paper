@@ -152,6 +152,11 @@ class News(TimeStampedModel):
     seo_excerpt = models.TextField(blank=True)
     canonical_url = models.URLField(blank=True)
     seo_index = models.BooleanField(default=True)
+    seo_keywords = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="SEO keywords as a list"
+    )
 
     class Meta:
         verbose_name = "News"

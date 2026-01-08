@@ -3,6 +3,7 @@ from django.utils.html import format_html
 from django.db.models import Count
 from .models import Category, Tag, Author, News, MediaFile, NewsRead
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = [
@@ -165,6 +166,7 @@ class NewsAdmin(admin.ModelAdmin):
                     "seo_excerpt",
                     "canonical_url",
                     "seo_index",
+                    "seo_keywords",
                 ),
                 "classes": ("collapse",),
             },
