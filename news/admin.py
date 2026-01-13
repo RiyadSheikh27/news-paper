@@ -171,6 +171,34 @@ class NewsAdmin(admin.ModelAdmin):
                 "classes": ("collapse",),
             },
         ),
+        (
+            "OpenGraph",
+            {
+                "fields": (
+                    "og_title",
+                    "og_subtitle",
+                    "og_description",
+                    "og_excerpt",
+                    "og_type",
+                    "og_image",
+                    "og_url",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Twitter",
+            {
+                "fields": (
+                    "twitter_title",
+                    "twitter_subtitle",
+                    "twitter_description",
+                    "twitter_excerpt",
+                    "twitter_image",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
         ("Statistics", {"fields": ("views_count",), "classes": ("collapse",)}),
         (
             "Timestamps",

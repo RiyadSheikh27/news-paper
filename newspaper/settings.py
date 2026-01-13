@@ -34,7 +34,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3001",
     "http://localhost:3002",
     "http://localhost:8000",
-    "https://yourdomain.com",
+    "https://mhnoman.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True

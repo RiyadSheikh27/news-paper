@@ -109,6 +109,10 @@ class NewsListSerializer(serializers.ModelSerializer):
     tags_list = serializers.SerializerMethodField()
     feature_image = serializers.SerializerMethodField()
     is_read = serializers.SerializerMethodField()
+    seo = serializers.SerializerMethodField()
+    og_graph = serializers.SerializerMethodField()
+    twitter = serializers.SerializerMethodField()
+    schema = serializers.SerializerMethodField()
 
     class Meta:
         model = News
@@ -124,6 +128,10 @@ class NewsListSerializer(serializers.ModelSerializer):
             "tags_list",
             "feature_image",
             "status",
+            "seo",
+            "og_graph",
+            "twitter",
+            "schema",
             "is_pinned_global",
             "is_pinned_category",
             "published_at",
@@ -136,6 +144,42 @@ class NewsListSerializer(serializers.ModelSerializer):
         return [
             {"id": tag.id, "name": tag.name, "slug": tag.slug} for tag in obj.tags.all()
         ]
+
+    def get_seo(self, obj):
+        """Return SEO data in the format specified"""
+        return {
+            "seo_title": obj.seo_title,
+            "seo_subtitle": obj.seo_subtitle,
+            "seo_description": obj.seo_description,
+            "seo_excerpt": obj.seo_excerpt,
+            "canonical_url": obj.canonical_url,
+            "seo_index": obj.seo_index,
+            "seo_keywords": obj.seo_keywords,
+        }
+    def get_og_graph(self, obj):
+        """Return Open Graph data in the format specified"""
+        return {
+            "og_title": obj.og_title,
+            "og_subtitle": obj.og_subtitle,
+            "og_excerpt": obj.og_excerpt,
+            "og_description": obj.og_description,
+            "og_image": obj.og_image.url if obj.og_image else None,
+            "og_url": obj.og_url,
+            "og_type": obj.og_type,
+        }
+    def get_twitter(self, obj):
+        """Return Twitter Card data in the format specified"""
+        return {
+            "twitter_title": obj.twitter_title,
+            "twitter_subtitle": obj.twitter_subtitle,
+            "twitter_excerpt": obj.twitter_excerpt,
+            "twitter_description": obj.twitter_description,
+            "twitter_image": obj.twitter_image.url if obj.twitter_image else None,
+        }
+
+    def get_schema(self, obj):
+        """Return Schema.org data in the format specified"""
+        return obj.get_schema_org_data()
 
     def get_feature_image(self, obj):
         featured = obj.media_files.filter(is_featured=True, file_type="IMAGE").first()
@@ -173,6 +217,9 @@ class NewsDetailSerializer(serializers.ModelSerializer):
     )
 
     seo = serializers.SerializerMethodField()
+    og_graph = serializers.SerializerMethodField()
+    twitter = serializers.SerializerMethodField()
+    schema = serializers.SerializerMethodField()
     is_read = serializers.SerializerMethodField()
 
     class Meta:
@@ -199,6 +246,9 @@ class NewsDetailSerializer(serializers.ModelSerializer):
             "is_pinned_global",
             "is_pinned_category",
             "seo",
+            "og_graph",
+            "twitter",
+            "schema",
             "is_read",
             "created_at",
             "updated_at",
@@ -230,6 +280,30 @@ class NewsDetailSerializer(serializers.ModelSerializer):
             "seo_index": obj.seo_index,
             "seo_keywords": obj.seo_keywords,
         }
+
+    def get_og_graph(self, obj):
+        """Return Open Graph data in the format specified"""
+        return {
+            "og_title": obj.og_title,
+            "og_subtitle": obj.og_subtitle,
+            "og_excerpt": obj.og_excerpt,
+            "og_description": obj.og_description,
+            "og_image": obj.og_image.url if obj.og_image else None,
+            "og_url": obj.og_url,
+            "og_type": obj.og_type,
+        }
+    def get_twitter(self, obj):
+        """Return Twitter Card data in the format specified"""
+        return {
+            "twitter_title": obj.twitter_title,
+            "twitter_subtitle": obj.twitter_subtitle,
+            "twitter_excerpt": obj.twitter_excerpt,
+            "twitter_description": obj.twitter_description,
+            "twitter_image": obj.twitter_image.url if obj.twitter_image else None,
+        }
+    def get_schema(self, obj):
+        """Return Schema.org data in the format specified"""
+        return obj.get_schema_org_data()
 
     def get_is_read(self, obj):
         """Check if news is read from context"""

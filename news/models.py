@@ -157,6 +157,29 @@ class News(TimeStampedModel):
         blank=True,
         help_text="SEO keywords as a list"
     )
+    """OpenGraph fields"""
+    og_title = models.CharField(max_length=200, blank=True)
+    og_subtitle = models.CharField(max_length=500, blank=True)
+    og_excerpt = models.TextField(blank=True)
+    og_description = models.TextField(blank=True)
+    og_type = models.CharField(max_length=100, blank=True)
+    og_image = models.ImageField(
+        upload_to='news_opengraph/',
+        blank=True,
+        null=True
+    )
+    og_url = models.URLField(blank=True)
+
+    """Twitter Card fields"""
+    twitter_title = models.CharField(max_length=200, blank=True)
+    twitter_subtitle = models.CharField(max_length=500, blank=True)
+    twitter_excerpt = models.TextField(blank=True)
+    twitter_description = models.TextField(blank=True)
+    twitter_image = models.ImageField(
+        upload_to='news_twitter/',
+        blank=True,
+        null=True
+    )
 
     class Meta:
         verbose_name = "News"
@@ -193,6 +216,32 @@ class News(TimeStampedModel):
         if not self.canonical_url:
             self.canonical_url = f"https://newsportal.com/news/{self.category.slug}/{self.slug}"
 
+        """Auto-populate OpenGraph fields if empty"""
+        if not self.og_title:
+            self.og_title = self.title
+        if not self.og_subtitle:
+            self.og_subtitle = self.subtitle
+        if not self.og_description:
+            self.og_description = self.excerpt
+        if not self.og_excerpt:
+            self.og_excerpt = self.excerpt
+        if not self.og_type:
+            self.og_type = "article"
+        if not self.og_url:
+            self.og_url = f"https://newsportal.com/news/{self.category.slug}/{self.slug}"
+
+        """Auto-populate Twitter Card fields if empty"""
+        if not self.twitter_title:
+            self.twitter_title = self.title
+        if not self.twitter_subtitle:
+            self.twitter_subtitle = self.subtitle
+        if not self.twitter_excerpt:
+            self.twitter_excerpt = self.excerpt
+        if not self.twitter_description:
+            self.twitter_description = self.excerpt
+        if not self.twitter_image:
+            self.twitter_image = self.og_image
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -202,6 +251,73 @@ class News(TimeStampedModel):
         """Increment view count"""
         self.views_count += 1
         self.save(update_fields=['views_count'])
+
+    def get_schema_org_data(self):
+        """Generate Schema.org JSON-LD structured data for SEO"""
+        from django.utils.html import strip_tags
+
+        schema_data = {
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            "headline": self.title,
+            "image": [],
+            "datePublished": self.published_at.isoformat() if self.published_at else self.created_at.isoformat(),
+            "dateModified": self.updated_at.isoformat(),
+            "author": {
+                "@type": "Person",
+                "name": self.author.name,
+                "url": f"https://newsportal.com/author/{slugify(self.author.name)}"
+            },
+            "publisher": {
+                "@type": "Organization",
+                "name": "BDRecordsToday",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://newsportal.com/logo.png"
+                }
+            },
+            "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": f"https://newsportal.com/news/{self.category.slug}/{self.slug}"
+            }
+        }
+
+        """Add subtitle as alternativeHeadline if available"""
+        if self.subtitle:
+            schema_data["alternativeHeadline"] = self.subtitle
+
+        """Add description"""
+        if self.excerpt:
+            schema_data["description"] = self.excerpt
+
+        """Add images from media files"""
+        featured_images = self.media_files.filter(is_featured=True, file_type='IMAGE')
+        if featured_images.exists():
+            for img in featured_images:
+                schema_data["image"].append(f"https://newsportal.com{img.file.url}")
+        elif self.og_image:
+            schema_data["image"].append(f"https://newsportal.com{self.og_image.url}")
+
+        """Add articleBody (content preview)"""
+        if self.content:
+            schema_data["articleBody"] = strip_tags(self.content)[:500] + "..."
+
+        """Add article section (category)"""
+        if self.category:
+            schema_data["articleSection"] = self.category.name
+
+        """Add keywords from tags"""
+        if self.tags.exists():
+            schema_data["keywords"] = ", ".join([tag.name for tag in self.tags.all()])
+        elif self.seo_keywords:
+            schema_data["keywords"] = ", ".join(self.seo_keywords)
+
+        """Add word count"""
+        if self.content:
+            word_count = len(strip_tags(self.content).split())
+            schema_data["wordCount"] = word_count
+
+        return schema_data
 
 
 class MediaFile(TimeStampedModel):
