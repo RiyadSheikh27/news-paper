@@ -35,6 +35,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3002",
     "http://localhost:8000",
     "https://mhnoman.com",
+    "https://newspaper.mhnoman.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
