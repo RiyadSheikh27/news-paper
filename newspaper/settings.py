@@ -35,6 +35,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3002",
     "http://localhost:8000",
     "https://mhnoman.com",
+    "https://newspaper.mhnoman.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -65,6 +66,7 @@ CORS_ALLOW_HEADERS = [
 # Application definition
 
 INSTALLED_APPS = [
+    # "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -236,3 +238,46 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# """Jazzmin settings"""
+# JAZZMIN_SETTINGS = {
+#     # Branding (keep it subtle)
+#     "site_title": "Admin",
+#     "site_header": "Dashboard",
+#     "site_brand": "Dashboard",
+
+#     # Disable extra UI noise
+#     "show_sidebar": True,
+#     "navigation_expanded": False,
+#     "hide_apps": [],
+#     "hide_models": [],
+
+#     # Remove top menu clutter
+#     "topmenu_links": [],
+
+#     # Keep icons minimal
+#     "icons": {},
+
+#     # Full width feeling
+#     "show_ui_builder": False,
+# }
+
+# JAZZMIN_UI_TWEAKS = {
+#     # Layout
+#     "navbar_fixed": False,
+#     "sidebar_fixed": True,
+
+#     # Typography
+#     "body_small_text": False,
+#     "footer_small_text": True,
+
+#     # Sidebar
+#     "sidebar_nav_small_text": True,
+#     "sidebar_nav_compact_style": True,
+#     "sidebar_nav_flat_style": True,
+#     "sidebar_disable_expand": True,
+
+#     # Colors (neutral)
+#     "theme": "simplex",
+#     "dark_mode_theme": None,
+# }
